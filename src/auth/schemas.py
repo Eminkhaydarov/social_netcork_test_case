@@ -14,7 +14,7 @@ class Token(BaseModel):
 
 class JWTData(BaseModel):
     username: str | None = None
-
+    user_id: int | None = None
 
 class UserSchema(BaseModel):
     username: str
@@ -43,3 +43,4 @@ class UserIn(UserSchema):
                 detail="Password requirements not met. Please use 4 to 16 characters, including letters (both "
                        "uppercase and lowercase), numbers, '@', '*', or '#'.",
             )
+        return value

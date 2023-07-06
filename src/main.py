@@ -8,5 +8,5 @@ app = FastAPI()
 router = APIRouter(prefix="/v1")
 
 
-router.include_router(auth_router)
+router.include_router(auth_router, tags=["Auth"])
 app.include_router(router)

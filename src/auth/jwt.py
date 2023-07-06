@@ -19,7 +19,7 @@ def create_access_token(user: User, expires_delta: timedelta | None = None):
         expire = datetime.utcnow() + expires_delta
     else:
         expire = datetime.utcnow() + timedelta(minutes=15)
-    to_encode.update({"exp": expire})
+    to_encode.update({"exp": expire, "user_id": user.id})
     encoded_jwt = jwt.encode(to_encode, setting.SECRET_KEY, algorithm=setting.ALGORITHM)
     return encoded_jwt
 
@@ -37,9 +37,10 @@ async def parse_jwt_data(
     try:
         payload = jwt.decode(token, setting.SECRET_KEY, algorithms=[setting.ALGORITHM])
         username: str = payload.get("sub")
+        user_id: str = payload.get("user_id")
         if username is None:
             raise credentials_exception
-        token_data = JWTData(username=username)
+        token_data = JWTData(username=username, user_id=user_id)
     except JWTError:
         raise credentials_exception
     return token_data
