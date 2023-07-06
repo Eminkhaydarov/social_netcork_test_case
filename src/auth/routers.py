@@ -16,7 +16,6 @@ auth_router = APIRouter()
     "/users", status_code=status.HTTP_201_CREATED, response_model=UserSchema
 )
 async def create_user(user_data: UserIn, service: AuthService = Depends()):
-    print(user_data.dict())
     user = await service.create_user(user_data)
     return UserSchema.from_orm(user)
 
@@ -41,3 +40,4 @@ async def login_for_access_token(
         )
     access_token = create_access_token(user)
     return {"access_token": access_token, "token_type": "bearer"}
+

@@ -3,7 +3,7 @@ from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
-from src.auth.models import User
+from src.models import User
 from src.auth.schemas import UserIn, UserSchema
 from src.auth.security import get_password_hash
 from src.database import get_session

@@ -7,10 +7,10 @@ from jose import jwt, JWTError
 from starlette import status
 
 from src.config import setting
-from src.auth.models import User
+from src.models import User
 from src.auth.schemas import Token, JWTData
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/users/tokens", auto_error=False)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/v1/users/tokens", auto_error=False)
 
 
 def create_access_token(user: User, expires_delta: timedelta | None = None):
