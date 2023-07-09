@@ -13,6 +13,8 @@ class Setting(BaseSettings):
     SECRET_KEY: str
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
+    EMAILHUNTER_API_KEY: str
+    CLEARBIT_API_KEY: str
 
     class Config:
         env_file = "../.env"
@@ -30,4 +32,6 @@ setting = Setting(
     SECRET_KEY=os.getenv("SECRET_KEY"),
     ALGORITHM=os.getenv("ALGORITHM"),
     ACCESS_TOKEN_EXPIRE_MINUTES=os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"),
+    EMAILHUNTER_API_KEY=os.getenv("EMAILHUNTER_API_KEY"),
+    CLEARBIT_API_KEY=os.getenv("CLEARBIT_API_KEY"),
 )

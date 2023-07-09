@@ -5,13 +5,6 @@ from sqlalchemy import event
 
 from sqlalchemy.orm import declarative_base
 
-from src.posts.redis import (
-    increase_likes_count,
-    decrease_dislikes_count,
-    increase_dislikes_count,
-    decrease_likes_count,
-)
-
 Base = declarative_base()
 
 
@@ -22,6 +15,10 @@ class User(Base):
     email = sa.Column(sa.String, unique=True)
     username = sa.Column(sa.String, unique=True)
     hashed_password = sa.Column(sa.String)
+    full_name = sa.Column(sa.String, nullable=True)
+    location = sa.Column(sa.String, nullable=True)
+    company = sa.Column(sa.String, nullable=True)
+
 
 
 class Posts(Base):
@@ -30,7 +27,7 @@ class Posts(Base):
     id = sa.Column(sa.Integer, primary_key=True)
     title = sa.Column(sa.String)
     content = sa.Column(sa.String, unique=True)
-    owner = sa.Column(sa.Integer, sa.ForeignKey("user.id"))
+    owner = sa.Column(sa.Integer, sa.ForeignKey("user.id", ondelete="CASCADE"))
 
 
 class UserPostReaction(Base):
@@ -41,4 +38,3 @@ class UserPostReaction(Base):
     post_id = sa.Column(sa.Integer, sa.ForeignKey("post.id", ondelete="CASCADE"))
     like = sa.Column(sa.Boolean, default=False)
     dislike = sa.Column(sa.Boolean, default=False)
-

@@ -16,6 +16,7 @@ class JWTData(BaseModel):
     username: str | None = None
     user_id: int | None = None
 
+
 class UserSchema(BaseModel):
     username: str
     email: EmailStr
@@ -44,3 +45,12 @@ class UserIn(UserSchema):
                        "uppercase and lowercase), numbers, '@', '*', or '#'.",
             )
         return value
+
+
+class UserOutSchema(UserSchema):
+    full_name: str
+    location: str
+    company: str
+
+    class Config:
+        orm_mode = True

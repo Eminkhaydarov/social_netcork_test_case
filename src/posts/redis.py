@@ -1,5 +1,3 @@
-from fastapi import Depends
-
 from src.database import get_redis_connection
 
 
