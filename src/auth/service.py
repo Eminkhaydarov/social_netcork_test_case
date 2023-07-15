@@ -11,6 +11,7 @@ from src.database import get_session
 from src.auth.verify_email import verify_email
 from src.auth.clearbit import get_additional_data
 
+
 class AuthService:
     def __init__(self, session: AsyncSession = Depends(get_session)):
         self.session = session
@@ -19,17 +20,13 @@ class AuthService:
         if await verify_email(user_data.email):
             try:
                 data = {
-                            "email": user_data.email,
-                            "username": user_data.username,
-                            "hashed_password": get_password_hash(user_data.password),
-                        }
+                    "email": user_data.email,
+                    "username": user_data.username,
+                    "hashed_password": get_password_hash(user_data.password),
+                }
                 additional_data = await get_additional_data(user_data.email)
                 insert_query = (
-                    insert(User)
-                    .values(
-                        data | additional_data
-                    )
-                    .returning(User)
+                    insert(User).values(data | additional_data).returning(User)
                 )
                 user = await self.session.scalar(insert_query)
                 await self.session.commit()
@@ -53,4 +50,3 @@ class AuthService:
         user = await self.session.execute(query)
         user = user.scalar_one_or_none()
         return user
-

@@ -10,6 +10,7 @@ class PostSchema(BaseModel):
 
 
 class PostOutSchema(PostSchema):
+    id: int
     owner: int
     like: bool | None = False
     dislike: bool | None = False

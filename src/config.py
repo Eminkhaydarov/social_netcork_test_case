@@ -15,6 +15,7 @@ class Setting(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     EMAILHUNTER_API_KEY: str
     CLEARBIT_API_KEY: str
+    TEST_DB_URL: str
 
     class Config:
         env_file = "../.env"
@@ -34,4 +35,5 @@ setting = Setting(
     ACCESS_TOKEN_EXPIRE_MINUTES=os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"),
     EMAILHUNTER_API_KEY=os.getenv("EMAILHUNTER_API_KEY"),
     CLEARBIT_API_KEY=os.getenv("CLEARBIT_API_KEY"),
+    TEST_DB_URL=os.getenv("TEST_DB_URL"),
 )

@@ -1,5 +1,14 @@
-version: "3.0"
+version: '3.11'
 services:
+  web:
+    build: .
+    volumes:
+      - .:/usr/src/app/
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+      - redis
   db:
     container_name: "db"
     image: postgres:15.0-alpine
@@ -21,23 +30,6 @@ services:
       - "${REDIS_PORT}:6379"
     volumes:
       - redis_data:/data
-  db_test:
-    container_name: "db_test"
-    image: postgres:15.0-alpine
-    restart: always
-    environment:
-      - POSTGRES_USER=postgres_test
-      - POSTGRES_PASSWORD=postgres_test
-      - POSTGRES_DB=postgres_test
-    ports:
-      - "5433:5432"
-
-  redis_test:
-    container_name: "redis_test"
-    image: redis:latest
-    restart: always
-    ports:
-      - "6378:6379"
 volumes:
   postgres_data:
   redis_data:

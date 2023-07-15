@@ -37,8 +37,7 @@ async def delete_posts(
     jwt_data: JWTData = Depends(parse_jwt_data),
     service: PostService = Depends(),
 ):
-    await service.check_permission(post_id, jwt_data)
-    await service.delete_post(post_id)
+    await service.delete_post(post_id, jwt_data.user_id)
 
 
 @post_router.patch(
@@ -52,8 +51,7 @@ async def update_post(
     jwt_data: JWTData = Depends(parse_jwt_data),
     service: PostService = Depends(),
 ):
-    await service.check_permission(post_id, jwt_data)
-    post = await service.update_post(post_id, post)
+    post = await service.update_post(post_id, post, jwt_data.user_id)
     return post
 
 
@@ -75,10 +73,11 @@ async def dislike(
     await service.dislike(post_id, jwt_data)
 
 
-@post_router.post("/posts", status_code=status.HTTP_200_OK)
+@post_router.post("/posts", status_code=status.HTTP_201_CREATED)
 async def create_post(
     post: PostSchema,
     jwt_data: JWTData = Depends(parse_jwt_data),
     service: PostService = Depends(),
 ):
-    await service.create_post(post, jwt_data.user_id)
+    post_id = await service.create_post(post, jwt_data.user_id)
+    return {"post_id": post_id}

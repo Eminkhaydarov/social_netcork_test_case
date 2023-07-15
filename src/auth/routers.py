@@ -22,8 +22,8 @@ async def create_user(user_data: UserIn, service: AuthService = Depends()):
 
 @auth_router.post("/users/tokens", status_code=status.HTTP_200_OK)
 async def login_for_access_token(
-        form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-        service: AuthService = Depends(),
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    service: AuthService = Depends(),
 ):
     user = await service.get_user_by_username(form_data.username)
     if not user:
@@ -41,8 +41,12 @@ async def login_for_access_token(
     access_token = create_access_token(user)
     return {"access_token": access_token, "token_type": "bearer"}
 
-@auth_router.get("/users/me", status_code=status.HTTP_200_OK, response_model=UserOutSchema)
-async def get_me(jwt_data: JWTData = Depends(parse_jwt_data),
+
+@auth_router.get(
+    "/users/me", status_code=status.HTTP_200_OK, response_model=UserOutSchema
+)
+async def get_me(
+    jwt_data: JWTData = Depends(parse_jwt_data),
     service: AuthService = Depends(),
 ):
     user = await service.get_user_by_username(jwt_data.username)

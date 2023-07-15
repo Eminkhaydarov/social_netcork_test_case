@@ -42,15 +42,15 @@ class UserIn(UserSchema):
             raise HTTPException(
                 status_code=422,
                 detail="Password requirements not met. Please use 4 to 16 characters, including letters (both "
-                       "uppercase and lowercase), numbers, '@', '*', or '#'.",
+                "uppercase and lowercase), numbers, '@', '*', or '#'.",
             )
         return value
 
 
 class UserOutSchema(UserSchema):
-    full_name: str
-    location: str
-    company: str
+    full_name: str | None = None
+    location: str | None = None
+    company: str | None = None
 
     class Config:
         orm_mode = True

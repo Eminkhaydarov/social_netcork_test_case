@@ -21,12 +21,15 @@ class PostService:
     def __init__(self, session: AsyncSession = Depends(get_session)):
         self.session = session
 
-    async def create_post(self, post: PostSchema, owner_id: int):
-        query = insert(Posts).values(
-            title=post.title, content=post.content, owner=owner_id
+    async def create_post(self, post: PostSchema, owner_id: int) -> int:
+        query = (
+            insert(Posts)
+            .values(title=post.title, content=post.content, owner=owner_id)
+            .returning(Posts.id)
         )
-        await self.session.execute(query)
+        post_id = await self.session.scalar(query)
         await self.session.commit()
+        return post_id
 
     async def get_posts(self, jwt_data: JWTData):
         query = select(Posts, UserPostReaction).outerjoin(
@@ -44,6 +47,7 @@ class PostService:
             dislike_count = get_dislikes_count(post.id)
             post_data.append(
                 PostOutSchema(
+                    id=post.id,
                     title=post.title,
                     content=post.content,
                     owner=post.owner,
@@ -79,6 +83,7 @@ class PostService:
         dislike_count = get_dislikes_count(post_id)
 
         return PostOutSchema(
+            id=post[0].id,
             title=post[0].title,
             content=post[0].content,
             owner=post[0].owner,
@@ -88,32 +93,41 @@ class PostService:
             dislike_count=dislike_count,
         )
 
-    async def delete_post(self, post_id):
-        query = delete(Posts).where(Posts.id == post_id)
-        result = await self.session.execute(query)
-        if result.rowcount == 0:
+    async def delete_post(self, post_id: int, user_id: int):
+        query = delete(Posts).where(Posts.id == post_id).returning(Posts)
+        result = await self.session.scalar(query)
+        if not result:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Post with id {post_id} not found.",
             )
+        if result.owner != user_id:
+            await self.session.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden"
+            )
         await self.session.commit()
 
-    async def update_post(self, post_id, post: PostUpdateSchema):
+    async def update_post(self, post_id, post: PostUpdateSchema, user_id: int):
         query = (
             update(Posts)
             .where(Posts.id == post_id)
             .values(post.dict())
             .returning(Posts)
         )
-        post = await self.session.scalar(query)
-
+        post_in_db = await self.session.scalar(query)
         if not post:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Post with id {post_id} not found.",
             )
+        if post_in_db.owner != user_id:
+            await self.session.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden"
+            )
         await self.session.commit()
-        return PostSchema.from_orm(post)
+        return PostSchema.from_orm(post_in_db)
 
     async def check_permission(self, post_id: int, jwt_data: JWTData):
         post = await self.get_post(post_id, jwt_data)

@@ -18,12 +18,6 @@ async def get_session() -> AsyncSession:
 
 
 def get_redis_connection():
-    redis_conn = redis.Redis(
-        host='localhost',
-        port=6379
-    )
-    return redis_conn
-
-
-async def cleanup_redis_connection(redis_conn):
-    await redis_conn.close()
+    redis_conn = redis.Redis(host="localhost", port=6379)
+    yield redis_conn
+    redis_conn.close()
