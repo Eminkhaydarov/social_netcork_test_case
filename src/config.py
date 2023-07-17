@@ -16,6 +16,7 @@ class Setting(BaseSettings):
     EMAILHUNTER_API_KEY: str
     CLEARBIT_API_KEY: str
     TEST_DB_URL: str
+    REDIS_PORT: int
 
     class Config:
         env_file = "../.env"
@@ -36,4 +37,5 @@ setting = Setting(
     EMAILHUNTER_API_KEY=os.getenv("EMAILHUNTER_API_KEY"),
     CLEARBIT_API_KEY=os.getenv("CLEARBIT_API_KEY"),
     TEST_DB_URL=os.getenv("TEST_DB_URL"),
+    REDIS_PORT=os.getenv("REDIS_PORT"),
 )

@@ -1,10 +1,10 @@
 import asyncio
-import os
+
 from typing import AsyncGenerator
 
 import asyncpg
 import pytest
-import redis
+import redis.asyncio as aioredis
 from httpx import AsyncClient
 from pydantic import EmailStr
 from sqlalchemy import NullPool
@@ -17,7 +17,7 @@ from src.config import setting
 
 from starlette.testclient import TestClient
 from src.main import app
-from src.database import get_session, get_redis_connection, cleanup_redis_connection
+from src.database import get_session, get_redis_connection
 from src.models import Base, User
 from src.auth.security import get_password_hash
 
@@ -32,10 +32,9 @@ async def override_get_async_session() -> AsyncGenerator[AsyncSession, None]:
         yield session
 
 
-def override_get_redis_connection():
-    redis_conn = redis.Redis(host="localhost", port=6378)
-    yield redis_conn
-    redis_conn.close()
+async def override_get_redis_connection():
+    redis = await aioredis.from_url(f"redis://localhost:6378")
+    return redis
 
 
 app.dependency_overrides[get_session] = override_get_async_session
@@ -52,6 +51,25 @@ async def prepare_database():
 
 
 # SETUP
+@pytest.fixture(autouse=True)
+async def cleanup_tables():
+    # Выполняется перед каждым тестом
+
+    # Подключение к Redis
+    redis_conn = await override_get_redis_connection()
+
+    # Получение клиента Redis
+    async with redis_conn.client() as redis_client:
+        # Имена таблиц для удаления
+        table_names = ["post_likes", "post_dislikes"]
+
+        # Удаление таблиц
+        for table_name in table_names:
+            await redis_client.delete(table_name)
+
+    yield
+
+
 @pytest.fixture(scope="session")
 def event_loop(request):
     """Create an instance of the default event loop for each test case."""

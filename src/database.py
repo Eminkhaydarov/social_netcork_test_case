@@ -1,7 +1,8 @@
-import redis
+from redis import asyncio as aioredis
+from redis.asyncio.client import Redis
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.orm import sessionmaker
 
 from src.config import setting
 
@@ -17,7 +18,6 @@ async def get_session() -> AsyncSession:
         yield session
 
 
-def get_redis_connection():
-    redis_conn = redis.Redis(host="localhost", port=6379)
-    yield redis_conn
-    redis_conn.close()
+async def get_redis_connection() -> Redis:
+    redis = await aioredis.from_url(f"redis://localhost:{setting.REDIS_PORT}")
+    return redis

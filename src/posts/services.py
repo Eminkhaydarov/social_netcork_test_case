@@ -43,8 +43,8 @@ class PostService:
         posts = await self.session.execute(query)
         post_data = []
         for post, reaction in posts:
-            likes_count = get_likes_count(post.id)
-            dislike_count = get_dislikes_count(post.id)
+            likes_count = await get_likes_count(post.id)
+            dislike_count = await get_dislikes_count(post.id)
             post_data.append(
                 PostOutSchema(
                     id=post.id,
@@ -79,8 +79,8 @@ class PostService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Post with id {post_id} not found",
             )
-        likes_count = get_likes_count(post_id)
-        dislike_count = get_dislikes_count(post_id)
+        likes_count = await get_likes_count(post_id)
+        dislike_count = await get_dislikes_count(post_id)
 
         return PostOutSchema(
             id=post[0].id,
@@ -154,7 +154,7 @@ class PostService:
                 user_id=jwt_data.user_id, post_id=post_id, dislike=True
             )
             self.session.add(query)
-            increase_dislikes_count(post_id)
+            await increase_dislikes_count(post_id)
         elif reaction.dislike:
             query = (
                 update(UserPostReaction)
@@ -165,7 +165,7 @@ class PostService:
                 )
             )
             await self.session.execute(query)
-            decrease_dislikes_count(post_id)
+            await decrease_dislikes_count(post_id)
         else:
             query = (
                 update(UserPostReaction)
@@ -176,9 +176,9 @@ class PostService:
                 )
             )
             await self.session.execute(query)
-            increase_dislikes_count(post_id)
+            await increase_dislikes_count(post_id)
             if reaction.like:
-                decrease_likes_count(post_id)
+                await decrease_likes_count(post_id)
         await self.session.commit()
 
     async def like(self, post_id: int, jwt_data: JWTData):
@@ -189,7 +189,7 @@ class PostService:
                 user_id=jwt_data.user_id, post_id=post_id, like=True
             )
             self.session.add(query)
-            increase_likes_count(post_id)
+            await increase_likes_count(post_id)
         elif reaction.like:
             query = (
                 update(UserPostReaction)
@@ -200,7 +200,7 @@ class PostService:
                 )
             )
             await self.session.execute(query)
-            decrease_likes_count(post_id)
+            await decrease_likes_count(post_id)
         else:
             query = (
                 update(UserPostReaction)
@@ -211,7 +211,7 @@ class PostService:
                 )
             )
             await self.session.execute(query)
-            increase_likes_count(post_id)
+            await increase_likes_count(post_id)
             if reaction.dislike:
-                decrease_dislikes_count(post_id)
+                await decrease_dislikes_count(post_id)
         await self.session.commit()
